@@ -66,10 +66,6 @@
         </nav>
 
         <div class="sidebar-footer">
-            <button onclick="toggleTheme()" class="sidebar-theme-btn" title="Ubah Tema">
-                <i id="theme-icon" class="bx bx-moon"></i>
-                <span id="theme-label">Mode Gelap</span>
-            </button>
             <a href="{{ route('home') }}?view=website" class="sidebar-nav-item" style="opacity:0.75;">
                 <i class="bx bx-globe"></i><span>Lihat Website</span>
             </a>
@@ -603,11 +599,7 @@
             </nav>
 
             <div class="nav-actions" style="display:flex;gap:15px;align-items:center;">
-                <button id="theme-toggle" class="btn btn-outline btn-icon-sm"
-                    style="font-size:1.3rem;border:1px solid var(--border);background:var(--surface);display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;color:var(--text-primary);cursor:pointer;"
-                    onclick="toggleTheme()" title="Ubah Tema">
-                    <i id="theme-icon" class="bx bx-moon"></i>
-                </button>
+
 
                 @guest
                     <a href="{{ route('login') }}" class="btn btn-outline btn-sm" style="padding:10px 20px;">Masuk</a>
@@ -671,7 +663,117 @@
             .floating-cms-btn i {
                 font-size: 1.2rem;
             }
+
+            /* Live CMS Editor Panel */
+            .live-cms-panel {
+                position: fixed; top: 0; right: -400px; width: 400px; height: 100vh;
+                background: var(--surface); border-left: 1px solid var(--border);
+                box-shadow: -5px 0 25px rgba(0,0,0,0.1); z-index: 10000;
+                transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                display: flex; flex-direction: column;
+            }
+            .live-cms-panel.open { right: 0; }
+            .live-cms-header {
+                padding: 20px; border-bottom: 1px solid var(--border);
+                display: flex; justify-content: space-between; align-items: center;
+                background: var(--background);
+            }
+            .live-cms-header h3 { font-size: 1.1rem; margin: 0; display: flex; align-items: center; gap: 8px; color: var(--primary); }
+            .live-cms-close { background: transparent; border: none; font-size: 1.5rem; color: var(--text-secondary); cursor: pointer; }
+            .live-cms-body { padding: 20px; overflow-y: auto; flex: 1; }
+            .live-cms-body .cms-section-title { font-size: 0.9rem; margin-top: 15px; margin-bottom: 10px; padding-bottom: 5px; border-bottom: 1px dashed var(--border); color: var(--text-secondary); }
+            
+            /* Override .cms-form for light mode inside the panel */
+            .live-cms-panel .cms-form .form-group label { color: var(--text-secondary); font-weight: 600; font-size: 0.85rem; margin-bottom: 6px; }
+            .live-cms-panel .cms-form .form-group input, 
+            .live-cms-panel .cms-form .form-group textarea {
+                background: var(--background);
+                border: 1px solid var(--border);
+                color: var(--text-primary);
+                border-radius: var(--radius-sm);
+                padding: 10px 14px;
+            }
+            .live-cms-panel .cms-form .form-group input:focus, 
+            .live-cms-panel .cms-form .form-group textarea:focus {
+                border-color: var(--primary);
+                box-shadow: 0 0 0 3px var(--primary-light);
+            }
+            .live-cms-panel .cms-section-title {
+                color: var(--primary);
+                font-weight: 700;
+                border-bottom-color: rgba(0,0,0,0.1);
+            }
+
+            .floating-edit-btn {
+                position: fixed; bottom: 90px; right: 30px;
+                background: var(--surface); color: var(--text-primary);
+                border: 1px solid var(--border);
+                padding: 12px 20px; border-radius: 50px;
+                font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 0.9rem;
+                display: flex; align-items: center; gap: 8px; cursor: pointer;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.08); z-index: 9999;
+                transition: all 0.2s;
+            }
+            .floating-edit-btn:hover { background: var(--background); transform: translateY(-3px); }
         </style>
+
+        <button onclick="document.getElementById('live-cms').classList.add('open')" class="floating-edit-btn" title="Buka Live Editor CMS">
+            <i class="bx bx-edit"></i> Edit Tampilan Web
+        </button>
+
+        <div class="live-cms-panel" id="live-cms">
+            <div class="live-cms-header">
+                <h3><i class="bx bx-edit-alt"></i> Live CMS Editor</h3>
+                <button class="live-cms-close" onclick="document.getElementById('live-cms').classList.remove('open')">&times;</button>
+            </div>
+            <div class="live-cms-body">
+                <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:15px;">
+                    Ubah teks di bawah ini dan lihat perubahannya secara langsung di website.
+                </p>
+                <form action="{{ route('cms.settings.update') }}" method="POST" class="cms-form" style="gap:10px;">
+                    @csrf
+                    <input type="hidden" name="redirect_to" value="website">
+                    
+                    <div class="cms-section-title">Informasi Toko</div>
+                    <div class="form-group">
+                        <label>Nama Toko</label>
+                        <input type="text" name="shop_name" value="{{ $settings['shop_name'] ?? 'Nia Store' }}" oninput="previewText('logo-text', this.value); previewText('footer-shop-name', this.value);" required>
+                    </div>
+
+                    <div class="cms-section-title">Bagian Hero Banner</div>
+                    <div class="form-group">
+                        <label>Judul Banner</label>
+                        <input type="text" name="hero_title" value="{{ $settings['hero_title'] ?? '' }}" oninput="previewText('hero-title-display', this.value);" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Sub-judul Banner</label>
+                        <textarea name="hero_subtitle" rows="3" oninput="previewText('hero-subtitle-display', this.value);" required>{{ $settings['hero_subtitle'] ?? '' }}</textarea>
+                    </div>
+
+                    <div class="cms-section-title">Bagian Tentang Kami</div>
+                    <div class="form-group">
+                        <label>Deskripsi Tentang Kami</label>
+                        <textarea name="about_text" rows="4" oninput="previewText('about-text-display', this.value);" required>{{ $settings['about_text'] ?? '' }}</textarea>
+                    </div>
+
+                    <div class="cms-section-title">Informasi Kontak</div>
+                    <div class="form-group">
+                        <label>Email Kontak</label>
+                        <input type="email" name="contact_email" value="{{ $settings['contact_email'] ?? '' }}" oninput="previewText('contact-email-display', this.value);" required>
+                    </div>
+                    <div class="form-group">
+                        <label>No. Telepon / WA</label>
+                        <input type="text" name="contact_phone" value="{{ $settings['contact_phone'] ?? '' }}" oninput="previewText('contact-phone-display', this.value);" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Alamat Fisik</label>
+                        <textarea name="contact_address" rows="2" oninput="previewText('contact-address-display', this.value);" required>{{ $settings['contact_address'] ?? '' }}</textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block" style="margin-top:15px; position:sticky; bottom:0;"><i class="bx bx-save"></i> Simpan Permanen</button>
+                </form>
+            </div>
+        </div>
     @endif
 
     <!-- Success / Error Toast -->
@@ -1119,34 +1221,23 @@
         if (t) { t.style.animation = 'fadeOut 0.4s ease forwards'; setTimeout(() => t.remove(), 400); }
     }
 
-    // ---- THEME ----
-    function initThemeIcon() {
-        const theme = document.documentElement.getAttribute('data-theme') || 'light';
-        const icon = document.getElementById('theme-icon');
-        const label = document.getElementById('theme-label');
-        if (icon) icon.className = theme === 'dark' ? 'bx bx-sun' : 'bx bx-moon';
-        if (label) label.textContent = theme === 'dark' ? 'Mode Terang' : 'Mode Gelap';
-    }
-
-    function toggleTheme() {
-        const theme = document.documentElement.getAttribute('data-theme') || 'light';
-        const newTheme = theme === 'dark' ? 'light' : 'dark';
-        if (newTheme === 'dark') {
+    // ---- THEME (Auto based on System Preference) ----
+    function applySystemTheme(e) {
+        if (e.matches) {
             document.documentElement.setAttribute('data-theme', 'dark');
-            localStorage.setItem('theme', 'dark');
         } else {
             document.documentElement.removeAttribute('data-theme');
-            localStorage.setItem('theme', 'light');
         }
-        initThemeIcon();
     }
+
+    const themeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    applySystemTheme(themeMediaQuery); // Apply immediately on load
+    themeMediaQuery.addEventListener('change', applySystemTheme); // Listen for changes
 
     // ---- INIT ----
     window.addEventListener('DOMContentLoaded', () => {
         const toast = document.getElementById('toast-message');
         if (toast) setTimeout(() => closeToast(), 5000);
-
-        initThemeIcon();
 
         const navLinks = document.querySelectorAll('.nav-links a');
         const sections = document.querySelectorAll('section[id]');
