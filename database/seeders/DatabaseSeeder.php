@@ -18,11 +18,28 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Add default admin
+        // Add Super Admin
+        User::factory()->create([
+            'name' => 'Super Admin Nia',
+            'email' => 'superadmin@niastore.com',
+            'password' => bcrypt('password'),
+            'role' => 'super_admin',
+        ]);
+
+        // Add Admin
         User::factory()->create([
             'name' => 'Admin Nia',
             'email' => 'admin@niastore.com',
             'password' => bcrypt('password'),
+            'role' => 'admin',
+        ]);
+
+        // Add regular User
+        User::factory()->create([
+            'name' => 'Customer Nia',
+            'email' => 'user@niastore.com',
+            'password' => bcrypt('password'),
+            'role' => 'user',
         ]);
 
         // Add site settings

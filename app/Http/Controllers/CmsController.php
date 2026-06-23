@@ -207,4 +207,106 @@ class CmsController extends Controller
 
         return redirect()->back()->with('success', 'Pesan masuk berhasil dihapus!');
     }
+
+    /**
+     * Add a new user (admin/super_admin action).
+     */
+    public function storeUser(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:6',
+            'role' => 'required|string|in:user,admin,super_admin',
+        ]);
+
+        // Prevent admin from creating super_admin
+        if (auth()->user()->role === 'admin' && $validated['role'] === 'super_admin') {
+            return redirect()->back()->withErrors(['role' => 'Anda tidak memiliki izin untuk membuat Super Admin.']);
+        }
+
+        \App\Models\User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => \Illuminate\Support\Facades\Hash::make($validated['password']),
+            'role' => $validated['role'],
+        ]);
+
+        return redirect()->back()->with('success', 'Pengguna baru berhasil ditambahkan!');
+    }
+
+    /**
+     * Update user details (admin/super_admin action).
+     */
+    public function updateUser(Request $request, $id)
+    {
+        $user = \App\Models\User::findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'password' => 'nullable|string|min:6',
+            'role' => 'required|string|in:user,admin,super_admin',
+        ]);
+
+        // Prevent admin from making someone super_admin, or editing a super_admin
+        if (auth()->user()->role === 'admin') {
+            if ($validated['role'] === 'super_admin' || $user->role === 'super_admin') {
+                return redirect()->back()->withErrors(['role' => 'Anda tidak memiliki izin untuk mengedit Super Admin.']);
+            }
+        }
+
+        $user->name = $validated['name'];
+        $user->email = $validated['email'];
+        $user->role = $validated['role'];
+
+        if (!empty($validated['password'])) {
+            $user->password = \Illuminate\Support\Facades\Hash::make($validated['password']);
+        }
+
+        $user->save();
+
+        return redirect()->back()->with('success', 'Data pengguna berhasil diperbarui!');
+    }
+
+    /**
+     * Quick update user role.
+     */
+    public function updateUserRole(Request $request, $id)
+    {
+        $user = \App\Models\User::findOrFail($id);
+
+        $validated = $request->validate([
+            'role' => 'required|string|in:user,admin,super_admin',
+        ]);
+
+        // Only super_admin can use this quick action properly for all roles
+        if (auth()->user()->role !== 'super_admin') {
+            return redirect()->back()->withErrors(['role' => 'Hanya Super Admin yang bisa mengubah role secara langsung.']);
+        }
+
+        $user->update(['role' => $validated['role']]);
+
+        return redirect()->back()->with('success', 'Role pengguna berhasil diperbarui!');
+    }
+
+    /**
+     * Delete a user.
+     */
+    public function destroyUser($id)
+    {
+        $user = \App\Models\User::findOrFail($id);
+
+        if (auth()->user()->role === 'admin' && $user->role === 'super_admin') {
+            return redirect()->back()->withErrors(['role' => 'Anda tidak bisa menghapus Super Admin.']);
+        }
+
+        if ($user->id === auth()->id()) {
+            return redirect()->back()->withErrors(['role' => 'Anda tidak bisa menghapus akun Anda sendiri.']);
+        }
+
+        $user->delete();
+
+        return redirect()->back()->with('success', 'Pengguna berhasil dihapus!');
+    }
 }

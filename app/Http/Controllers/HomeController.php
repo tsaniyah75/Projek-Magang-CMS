@@ -8,7 +8,9 @@ use App\Models\SiteSetting;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\ContactMessage;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller
@@ -18,6 +20,18 @@ class HomeController extends Controller
      */
     public function index(Request $request)
     {
+        // Toggle view mode for admins
+        if ($request->has('view')) {
+            if ($request->view === 'website') {
+                session(['admin_view_website' => true]);
+            } elseif ($request->view === 'cms') {
+                session(['admin_view_website' => false]);
+            }
+            
+            // Remove the query parameter from URL
+            return redirect()->route('home');
+        }
+
         // Get all site settings as a key-value array
         $settings = SiteSetting::pluck('value', 'key')->all();
 
@@ -46,7 +60,17 @@ class HomeController extends Controller
         $orders = Order::with('items.product')->latest()->get();
         $messages = ContactMessage::latest()->get();
 
-        return view('index', compact('products', 'settings', 'categories', 'orders', 'messages'));
+        // Get users for admin/super admin panel
+        $users = collect();
+        if (Auth::check()) {
+            if (Auth::user()->role === 'super_admin') {
+                $users = User::latest()->get();
+            } elseif (Auth::user()->role === 'admin') {
+                $users = User::where('role', 'user')->latest()->get();
+            }
+        }
+
+        return view('index', compact('products', 'settings', 'categories', 'orders', 'messages', 'users'));
     }
 
     /**
