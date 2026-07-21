@@ -4,9 +4,9 @@
         <div class="footer-brand">
             <a href="{{ route('home') }}" class="logo">
                 <i class="bx bxs-shopping-bag logo-icon"></i>
-                <span>{{ $settings['shop_name'] ?? 'Nia Store' }}</span>
+                <span>{{ $settings['shop_name'] ?? 'Sepatuku.id' }}</span>
             </a>
-            <p>E-commerce modern dengan kemudahan akses langsung pengeditan halaman (CMS) secara dinamis.</p>
+            <p>Destinasi belanja sepatu online terlengkap & terpercaya. Ribuan model sepatu, 100% original, pengiriman kilat ke seluruh Indonesia.</p>
             <div class="social-links">
                 <a href="#"><i class="bx bxl-facebook"></i></a>
                 <a href="#"><i class="bx bxl-instagram"></i></a>

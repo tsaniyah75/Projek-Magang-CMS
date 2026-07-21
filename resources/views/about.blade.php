@@ -6,20 +6,24 @@
 <section id="about" class="about-section" style="padding-top: 120px; min-height: 80vh;">
     <div class="container about-container">
         <div class="about-image">
-            <img src="{{ $settings['about_image_url'] ?? 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=800&auto=format&fit=crop' }}" alt="Tim Nia Store" class="about-img">
+            <img src="{{ $settings['about_image_url'] ?? 'https://images.unsplash.com/photo-1556906781-9a412961c28c?q=80&w=800&auto=format&fit=crop' }}" alt="Sepatuku.id Store" class="about-img">
         </div>
         <div class="about-content">
             <span class="badge">Tentang Kami</span>
-            <h2>Misi Nia Store Dalam Menyediakan Kenyamanan Berbelanja</h2>
-            <p id="about-text-display">{{ $settings['about_text'] ?? 'Nia Store adalah platform e-commerce pilihan yang menyediakan produk-produk kurasi terbaik. Komitmen kami adalah memberikan pengalaman berbelanja yang mudah, cepat, dan aman serta kualitas produk yang selalu terjaga.' }}</p>
+            <h2>Sepatuku.id — Destinasi Sepatu Terlengkap di Indonesia</h2>
+            <p id="about-text-display">{{ $settings['about_text'] ?? 'Sepatuku.id adalah toko sepatu online terpercaya yang menghadirkan koleksi sepatu terlengkap untuk pria dan wanita. Dari sneakers kasual hingga sepatu formal elegan, kami berkomitmen menghadirkan produk original berkualitas dengan pengalaman belanja yang mudah dan menyenangkan.' }}</p>
             <div class="about-features">
                 <div class="feature-item">
                     <i class="bx bx-medal feature-icon"></i>
-                    <div><h4>Kualitas Terbaik</h4><p>Semua produk melalui quality control yang sangat ketat.</p></div>
+                    <div><h4>100% Produk Original</h4><p>Semua sepatu adalah produk resmi bergaransi dari brand ternama dan terpercaya.</p></div>
                 </div>
                 <div class="feature-item">
                     <i class="bx bx-rocket feature-icon"></i>
-                    <div><h4>Pengiriman Cepat</h4><p>Bekerja sama dengan logistik terpercaya untuk garansi barang cepat sampai.</p></div>
+                    <div><h4>Pengiriman Kilat</h4><p>Dikirim ke seluruh Indonesia dalam 1-3 hari kerja dengan packaging premium.</p></div>
+                </div>
+                <div class="feature-item">
+                    <i class="bx bx-refresh feature-icon"></i>
+                    <div><h4>Garansi 30 Hari</h4><p>Tidak cocok ukurannya? Tukar tambah atau refund dalam 30 hari tanpa ribet.</p></div>
                 </div>
             </div>
         </div>
